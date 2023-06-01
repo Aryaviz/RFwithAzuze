@@ -1,0 +1,40 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+pool:
+  vmImage: 'windows-latest'
+strategy:
+  matrix:
+    Python37:
+      python.version: '3.7'
+
+
+steps:
+- task: UsePythonVersion@0
+  inputs: 
+    versionSpec: '$(python.version)'
+  displayName: 'Use Python $(python.version)'
+
+- script:
+    python -m pip install --upgrade pip
+  displayName: 'Install dependencies'
+
+- script:
+    pip install robotframework robotframework-pabot robotframework-seleniumlibrary webdrivermanager
+  displayName: 'Install dependencies'
+
+- powershell:
+    robot --pythonpath . -x outputxunit.xml RFwithAzuze
+  displayName: 'Run robot tests'
+
+- task: PublishTestResults@2
+  inputs:
+      testResultsFiles: outputxunit.xml 
+      searchFolder: 'D:\a\1\s\'
+  condition: succeededOrFailed()
+  displayName: 'Publish Test Results outputxunit.xml'
